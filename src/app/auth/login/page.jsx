@@ -12,7 +12,7 @@ import { ModeToggle } from "@/components/mode-toggle"
 
 import { useAuth } from "@/context/AuthProvider"
 
-export default async function LoginPage() {
+export default function LoginPage() {
   const email = useRef(null);
   const password = useRef(null);
   const [isLoading, setIsLoading] = useState(false)
