@@ -47,10 +47,7 @@ const trendingVideos = [
     creator: "JSNinja",
     createdAt: "5 days ago",
   },
-]
-
-const recommendedVideos = [
-  {
+    {
     id: "video5",
     title: "TypeScript for Beginners",
     thumbnail: "/placeholder.svg?height=180&width=320",
@@ -115,44 +112,11 @@ export default function HomePage() {
             </div>
           </div>
 
-          <Tabs defaultValue="trending" className="mb-8">
-            <TabsList>
-              <TabsTrigger value="trending">
-                <Flame className="h-4 w-4 mr-2" />
-                Trending
-              </TabsTrigger>
-              <TabsTrigger value="recommended">
-                <ThumbsUp className="h-4 w-4 mr-2" />
-                Recommended
-              </TabsTrigger>
-              <TabsTrigger value="recent">
-                <Clock className="h-4 w-4 mr-2" />
-                Recently Watched
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="trending" className="mt-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {trendingVideos.map((video) => (
-                  <VideoCard key={video.id} video={video} />
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="recommended" className="mt-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {recommendedVideos.map((video) => (
-                  <VideoCard key={video.id} video={video} />
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="recent" className="mt-6">
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No recently watched videos</p>
-                <Button variant="outline" className="mt-4">
-                  Browse videos
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
+            {trendingVideos.map((video) => (
+              <VideoCard key={video.id} video={video} />
+            ))}
+          </div>
 
           <div className="mt-12">
             <Card>

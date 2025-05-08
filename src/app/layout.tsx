@@ -12,6 +12,12 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "s2",
   description: "A fuze successor",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  }
 }
 
 export default function RootLayout({
@@ -25,7 +31,6 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <Header />
-            <br/>
             {children}
             <Toaster />
           </AuthProvider>
