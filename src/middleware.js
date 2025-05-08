@@ -2,8 +2,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from 'next/server';
 
-const protectedRoutes = ['/dashboard', '/profile', '/settings', "/home"]; // Require Auth
-const authRoutes = ['/auth/login', '/auth/signup', '/']; //Doesnt Require Auth
+const protectedRoutes = ['dashboard', 'profile', 'settings', "home"]; // Require Auth
+const authRoutes = ['auth', '']; //Doesnt Require Auth
 
 export async function middleware(req) {
   const res = NextResponse.next();
@@ -13,12 +13,12 @@ export async function middleware(req) {
 
   const path = req.nextUrl.pathname;
 
-  if (user && authRoutes.some(route => route === path)) {
+  if (user && authRoutes.some(route => route === path.split("/")[1])) {
     const url = new URL("/home", req.url);
     return NextResponse.redirect(url);
   }
 
-  if (!user && protectedRoutes.some(route => route === path)) {
+  if (!user && protectedRoutes.some(route => route === path.split("/")[1])) {
     const url = new URL("/auth/login", req.url);
     return NextResponse.redirect(url);
   }

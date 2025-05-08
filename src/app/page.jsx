@@ -11,8 +11,8 @@ export default function Home() {
       <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
         <div className="w-full max-w-md mx-auto text-center">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">Welcome to MeetUp</h1>
-            <p className="text-muted-foreground mt-2">Your simple video conferencing solution</p>
+            <h1 className="text-3xl font-bold tracking-tight">Welcome to s2</h1>
+            <p className="text-muted-foreground mt-2">A Successor to Fuze</p>
           </div>
           <div className="space-y-4">
             <Button asChild className="w-full" size="lg">
