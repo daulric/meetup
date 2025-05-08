@@ -90,7 +90,7 @@ const recommendedVideos = [
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { profile } = useAuth()
+  const { user: {profile} } = useAuth()
 
   return (
     <>
