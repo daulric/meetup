@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 import { useAuth } from "@/context/AuthProvider"
-import { redirect } from "next/navigation"
+import { toast } from "sonner"
 
 export default function SignupPage() {
   const email = useRef(null);
@@ -25,14 +25,7 @@ export default function SignupPage() {
   
     try {
       // Sign up user
-      const { data, error } = await supabase.auth.signUp({
-        email: email.current.value,
-        password: password.current.value,
-      });
-  
-      if (error) {
-        throw error;
-      }
+      const data = await signUp({email: email.current.value, password: password.current.value});
   
       const user = data.user;
   
@@ -48,13 +41,15 @@ export default function SignupPage() {
           .select();
   
         if (profileError) {
-          console.error("Profile insert error:", profileError);
+          throw profileError;
         } else if (profileData) {
           globalThis.location.href = "/"
         }
       }
     } catch (error) {
-      console.error("Signup error:", error.message);
+      toast.error("Sign Up Failed", {
+        description: error?.message
+      });
     } finally {
       setIsLoading(false);
     }

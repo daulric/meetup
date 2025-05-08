@@ -11,11 +11,13 @@ import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 
 import { useAuth } from "@/context/AuthProvider"
+import { toast } from "sonner"
 
 export default function LoginPage() {
   const email = useRef(null);
   const password = useRef(null);
   const [isLoading, setIsLoading] = useState(false)
+  //const [error, setError] = useState(null);
 
   const { signIn } = useAuth();
 
@@ -30,7 +32,9 @@ export default function LoginPage() {
         globalThis.location.href = "/";
       }
     } catch (error) {
-      console.error("Login error:", error)
+      toast.error("Login Failed", {
+        description: error?.message,
+      });
     } finally {
       setIsLoading(false)
     }
