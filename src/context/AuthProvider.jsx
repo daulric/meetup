@@ -57,7 +57,6 @@ export function AuthProvider({ children }) {
         
       } catch (error) {
         setError(error.message);
-        console.error('Error checking auth status:', error.message);
       } finally {
         setLoading(false);
       }
@@ -69,7 +68,6 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         const temp_profile = JSON.parse(sessionStorage.getItem("profile_user"));
-        console.log("profile", temp_profile);
 
         if (!temp_profile) {
 
@@ -172,7 +170,6 @@ export function AuthProvider({ children }) {
       }
     } catch (error) {
       setError(error.message);
-      console.error('Error signing out:', error.message);
     } finally {
       setLoading(false);
     }

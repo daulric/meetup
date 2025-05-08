@@ -69,9 +69,8 @@ export default function SignupPage() {
       //   },
       // })
 
-      console.log("GitHub signup clicked")
     } catch (error) {
-      console.error("GitHub signup error:", error)
+      //Error Handling for Github
       setIsLoading(false)
     }
   }

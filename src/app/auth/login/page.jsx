@@ -44,9 +44,9 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      console.log("GitHub login clicked")
+      // Github Signin Login Method
     } catch (error) {
-      console.error("GitHub login error:", error)
+      //Error Handling for Github Method
       setIsLoading(false)
     }
   }
