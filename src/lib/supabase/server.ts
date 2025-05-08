@@ -1,7 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { NextRequest } from 'next/server'
 
-export async function createClient() {
+export async function createClient(req?: NextRequest) {
   const cookieStore = await cookies()
 
   return createServerClient(
@@ -10,6 +11,20 @@ export async function createClient() {
     {
       cookies: {
         getAll() {
+
+          if (req) {
+            const cookieHeader = req.headers.get('cookie') || ''
+            return cookieHeader
+              .split(';')
+              .map(cookie => cookie.trim())
+              .filter(Boolean)
+              .map(cookie => {
+                const [name, ...rest] = cookie.split('=')
+                const value = rest.join('=')
+                return { name, value }
+              })
+          }
+
           return cookieStore.getAll()
         },
         setAll(cookiesToSet) {
@@ -18,9 +33,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            
           }
         },
       },

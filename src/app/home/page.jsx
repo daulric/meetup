@@ -8,7 +8,6 @@ import { Video, Users, Calendar, Settings } from "lucide-react"
 export default function DashboardPage() {
   return (
     <>
-      <Header isLoggedIn={true} />
       <main className="min-h-screen pt-20 p-4 bg-background">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">

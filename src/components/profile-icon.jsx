@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -16,19 +15,15 @@ import {
 import { LogOut, Settings, UserIcon, Mail, Github } from "lucide-react"
 import { useAuth } from "@/context/AuthProvider"
 
+import { useRouter } from "next/navigation"
+
 export function ProfileIcon() {
-  // This would be replaced with actual auth state from Supabase later
   const {user, signOut} = useAuth();
+  const router = useRouter();
 
   const handleLogout = () => {
-    // This would be replaced with actual logout logic
-    signOut()
-    // For demo purposes only
-    console.log("Logged out")
-  }
-
-  const handleLogin = () => {
-    globalThis.location.href = "/auth/login";
+    signOut();
+    globalThis.location.reload();
   }
 
   // Get initials for avatar fallback

@@ -9,7 +9,7 @@ import { Header } from "@/components/header"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "MeetUp - Video Conferencing",
+  title: "meetup - Video Conferencing",
   description: "A simple video conferencing solution",
 }
 
@@ -24,6 +24,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <Header />
+            <br/>
             {children}
           </AuthProvider>
         </ThemeProvider>

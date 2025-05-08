@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import Link from "next/link"
 import { Github } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -9,40 +9,57 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
+import { useAuth } from "@/context/AuthProvider"
+import { redirect } from "next/navigation"
 
 export default function SignupPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const email = useRef(null);
+  const username = useRef(null);
+  const  password = useRef(null);
   const [isLoading, setIsLoading] = useState(false)
+  const {signUp, supabase} = useAuth();
 
   const handleEmailSignup = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-
+    e.preventDefault();
+    setIsLoading(true);
+  
     try {
-      // TODO: Implement Supabase email signup
-      // Example:
-      // const { error } = await supabase.auth.signUp({
-      //   email,
-      //   password,
-      //   options: {
-      //     data: {
-      //       name,
-      //     },
-      //   },
-      // })
-
-      console.log("Sign up with:", name, email, password)
-
-      // Redirect or show success message
-      // window.location.href = "/dashboard"
+      // Sign up user
+      const { data, error } = await supabase.auth.signUp({
+        email: email.current.value,
+        password: password.current.value,
+      });
+  
+      if (error) {
+        throw error;
+      }
+  
+      const user = data.user;
+  
+      if (user) {
+        // Insert user profile into meetup-app.profiles table
+        const { data: profileData, error: profileError } = await supabase
+          .schema("meetup-app")
+          .from("profiles")
+          .insert({
+            id: user.id,
+            username: username.current.value,
+          })
+          .select();
+  
+        if (profileError) {
+          console.error("Profile insert error:", profileError);
+        } else if (profileData) {
+          globalThis.location.href = "/"
+        }
+      }
     } catch (error) {
-      console.error("Signup error:", error)
+      console.error("Signup error:", error.message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+  
 
   const handleGithubSignup = async () => {
     setIsLoading(true)
@@ -77,27 +94,31 @@ export default function SignupPage() {
         <CardContent className="space-y-4">
           <form onSubmit={handleEmailSignup} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Label htmlFor="name">Username</Label>
+              <Input
+                ref={username}
+                id="username" 
+                placeholder="john_doe" 
+                required
+                autoComplete="off"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
+                ref={email}
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
+                ref={password}
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
