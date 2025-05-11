@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/context/AuthProvider"
+import { compressAndUpload, uploadThumbnail } from "./MediaManager"
 
 export default function UploadPage() {
   const router = useRouter()
@@ -32,7 +33,7 @@ export default function UploadPage() {
   const [tags, setTags] = useState([])
   const [currentTag, setCurrentTag] = useState("")
   const fileInputRef = useRef(null)
-  const thumbnailInputRef = useRef(null)
+  const thumbnailInputRef = useRef(null);
 
   const handleVideoChange = (e) => {
     const file = e.target.files?.[0]
@@ -116,87 +117,32 @@ export default function UploadPage() {
     setUploadProgress(0)
 
     try {
-      // Show loading toast
-      const uploadToast = toast.loading("Uploading video...", {
-        description: "0% complete",
-      })
 
-      // Generate unique filenames
-      const videoFileName = `${Date.now()}-${videoFile.name.replace(/\s+/g, "-")}`
-      const thumbnailFileName = thumbnailFile ? `${Date.now()}-${thumbnailFile.name.replace(/\s+/g, "-")}` : null
+      const promised_uplaod = Promise.all([ compressAndUpload(videoFile), thumbnailFile && uploadThumbnail(thumbnailFile)]);
 
-      // Upload video to Supabase Storage
-      const { data: videoData, error: videoError } = await supabase.storage
-        .from("videos")
-        .upload(`public/${videoFileName}`, videoFile, {
-          cacheControl: "3600",
-          upsert: false,
-          onUploadProgress: (progress) => {
-            const percent = Math.round((progress.loaded / progress.total) * 100)
-            setUploadProgress(percent)
-            toast.loading("Uploading video...", {
-              id: uploadToast,
-              description: `${percent}% complete`,
-            })
-          },
-        })
+      toast.promise(promised_uplaod, {
+        loading: "Uploading...",
+        success: () => "Upload Finished",
+        error: (err) => ({ title: 'Upload Failed', description: err.message }),
+      });
 
-      if (videoError) {
-        throw new Error(`Video upload failed: ${videoError.message}`)
-      }
+      promised_uplaod.then(async ([video_path, thumbnail_path]) => {
+        const { error } = await supabase.schema("meetup-app").from("videos").insert({
+          title,
+          description,
+          video_path,
+          thumbnail_path,
+          visibility,
+          category
+        });
 
-      // Get video URL
-      const { data: videoUrl } = supabase.storage.from("videos").getPublicUrl(`public/${videoFileName}`)
+        if (error) throw new Error("Upload Data Failed");
+      }).catch(e => {
+        throw e
+      });
 
-      // Upload thumbnail if provided
-      let thumbnailUrl = null
-      if (thumbnailFile) {
-        const { data: thumbnailData, error: thumbnailError } = await supabase.storage
-          .from("thumbnails")
-          .upload(`public/${thumbnailFileName}`, thumbnailFile, {
-            cacheControl: "3600",
-            upsert: false,
-          })
-
-        if (thumbnailError) {
-          throw new Error(`Thumbnail upload failed: ${thumbnailError.message}`)
-        }
-
-        const { data: thumbUrl } = supabase.storage.from("thumbnails").getPublicUrl(`public/${thumbnailFileName}`)
-        thumbnailUrl = thumbUrl.publicUrl
-      }
-
-      // Save video metadata to database
-      const { data: videoMetadata, error: metadataError } = await supabase.from("videos").insert({
-        title,
-        description,
-        video_url: videoUrl.publicUrl,
-        thumbnail_url: thumbnailUrl,
-        user_id: user.id,
-        category,
-        visibility,
-        tags,
-        duration: 0, // This would be calculated server-side
-        views: 0,
-      })
-
-      if (metadataError) {
-        throw new Error(`Failed to save video metadata: ${metadataError.message}`)
-      }
-
-      // Update toast to success
-      toast.success("Upload complete", {
-        id: uploadToast,
-        description: "Your video has been uploaded successfully",
-      })
-
-      // Redirect to the video page or dashboard
-      setTimeout(() => {
-        router.push("/dashboard")
-      }, 2000)
     } catch (error) {
-      console.error("Upload error:", error)
-      toast.error("Upload failed", {
+      toast.error("Upload Failed", {
         description: error.message || "An error occurred during upload",
       })
     } finally {
