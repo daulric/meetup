@@ -1,0 +1,463 @@
+"use client"
+
+import { useState, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { Upload, X, ImageIcon, Tag, Globe, Lock, Link } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Progress } from "@/components/ui/progress"
+import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
+import { useAuth } from "@/context/AuthProvider"
+
+export default function UploadPage() {
+  const router = useRouter()
+  const { user, supabase } = useAuth()
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [videoFile, setVideoFile] = useState(null)
+  const [thumbnailFile, setThumbnailFile] = useState(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState(null)
+  const [videoPreview, setVideoPreview] = useState(null)
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+  const [category, setCategory] = useState("education")
+  const [visibility, setVisibility] = useState("public")
+  const [tags, setTags] = useState([])
+  const [currentTag, setCurrentTag] = useState("")
+  const fileInputRef = useRef(null)
+  const thumbnailInputRef = useRef(null)
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Check file type
+    if (!file.type.startsWith("video/")) {
+      toast.error("Invalid file type", {
+        description: "Please upload a video file",
+      })
+      return
+    }
+
+    // Check file size (100MB limit)
+    if (file.size > 100 * 1024 * 1024) {
+      toast.error("File too large", {
+        description: "Video size should be less than 100MB",
+      })
+      return
+    }
+
+    setVideoFile(file)
+
+    // Create video preview URL
+    const videoURL = URL.createObjectURL(file)
+    setVideoPreview(videoURL)
+
+    // Auto-generate title from filename if empty
+    if (!title) {
+      const fileName = file.name.replace(/\.[^/.]+$/, "") // Remove extension
+      setTitle(fileName)
+    }
+  }
+
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Check file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Invalid file type", {
+        description: "Please upload an image file for the thumbnail",
+      })
+      return
+    }
+
+    setThumbnailFile(file)
+
+    // Create thumbnail preview URL
+    const imageURL = URL.createObjectURL(file)
+    setThumbnailPreview(imageURL)
+  }
+
+  const handleAddTag = () => {
+    if (currentTag && !tags.includes(currentTag) && tags.length < 5) {
+      setTags([...tags, currentTag])
+      setCurrentTag("")
+    }
+  }
+
+  const handleRemoveTag = (tagToRemove) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove))
+  }
+
+  const handleUpload = async () => {
+    if (!videoFile) {
+      toast.error("No video selected", {
+        description: "Please select a video to upload",
+      })
+      return
+    }
+
+    if (!title.trim()) {
+      toast.error("Title required", {
+        description: "Please provide a title for your video",
+      })
+      return
+    }
+
+    setIsUploading(true)
+    setUploadProgress(0)
+
+    try {
+      // Show loading toast
+      const uploadToast = toast.loading("Uploading video...", {
+        description: "0% complete",
+      })
+
+      // Generate unique filenames
+      const videoFileName = `${Date.now()}-${videoFile.name.replace(/\s+/g, "-")}`
+      const thumbnailFileName = thumbnailFile ? `${Date.now()}-${thumbnailFile.name.replace(/\s+/g, "-")}` : null
+
+      // Upload video to Supabase Storage
+      const { data: videoData, error: videoError } = await supabase.storage
+        .from("videos")
+        .upload(`public/${videoFileName}`, videoFile, {
+          cacheControl: "3600",
+          upsert: false,
+          onUploadProgress: (progress) => {
+            const percent = Math.round((progress.loaded / progress.total) * 100)
+            setUploadProgress(percent)
+            toast.loading("Uploading video...", {
+              id: uploadToast,
+              description: `${percent}% complete`,
+            })
+          },
+        })
+
+      if (videoError) {
+        throw new Error(`Video upload failed: ${videoError.message}`)
+      }
+
+      // Get video URL
+      const { data: videoUrl } = supabase.storage.from("videos").getPublicUrl(`public/${videoFileName}`)
+
+      // Upload thumbnail if provided
+      let thumbnailUrl = null
+      if (thumbnailFile) {
+        const { data: thumbnailData, error: thumbnailError } = await supabase.storage
+          .from("thumbnails")
+          .upload(`public/${thumbnailFileName}`, thumbnailFile, {
+            cacheControl: "3600",
+            upsert: false,
+          })
+
+        if (thumbnailError) {
+          throw new Error(`Thumbnail upload failed: ${thumbnailError.message}`)
+        }
+
+        const { data: thumbUrl } = supabase.storage.from("thumbnails").getPublicUrl(`public/${thumbnailFileName}`)
+        thumbnailUrl = thumbUrl.publicUrl
+      }
+
+      // Save video metadata to database
+      const { data: videoMetadata, error: metadataError } = await supabase.from("videos").insert({
+        title,
+        description,
+        video_url: videoUrl.publicUrl,
+        thumbnail_url: thumbnailUrl,
+        user_id: user.id,
+        category,
+        visibility,
+        tags,
+        duration: 0, // This would be calculated server-side
+        views: 0,
+      })
+
+      if (metadataError) {
+        throw new Error(`Failed to save video metadata: ${metadataError.message}`)
+      }
+
+      // Update toast to success
+      toast.success("Upload complete", {
+        id: uploadToast,
+        description: "Your video has been uploaded successfully",
+      })
+
+      // Redirect to the video page or dashboard
+      setTimeout(() => {
+        router.push("/dashboard")
+      }, 2000)
+    } catch (error) {
+      console.error("Upload error:", error)
+      toast.error("Upload failed", {
+        description: error.message || "An error occurred during upload",
+      })
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  return (
+    <main className="min-h-screen pt-20 p-4 bg-background">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Upload Video</h1>
+          <p className="text-muted-foreground">Share your content with the world</p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Video Upload</CardTitle>
+            <CardDescription>Upload a video file and add details</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="file" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="file">File Upload</TabsTrigger>
+                <TabsTrigger value="details">Video Details</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="file" className="space-y-4 py-4">
+                {!videoFile ? (
+                  <div
+                    className="border-2 border-dashed rounded-lg p-12 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Drag and drop or click to upload</h3>
+                    <p className="text-sm text-muted-foreground mb-4">MP4, WebM, or MOV files up to 100MB</p>
+                    <Button variant="secondary">Select Video</Button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleVideoChange}
+                      accept="video/*"
+                      className="hidden"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium">Selected Video</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setVideoFile(null)
+                          setVideoPreview(null)
+                        }}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Remove
+                      </Button>
+                    </div>
+
+                    <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                      {videoPreview && (
+                        <video src={videoPreview} controls className="w-full h-full object-contain"></video>
+                      )}
+                    </div>
+
+                    <div className="text-sm text-muted-foreground">
+                      <p>Filename: {videoFile.name}</p>
+                      <p>Size: {(videoFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium">Thumbnail</h3>
+                        {thumbnailPreview && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setThumbnailFile(null)
+                              setThumbnailPreview(null)
+                            }}
+                          >
+                            <X className="h-4 w-4 mr-2" />
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+
+                      {thumbnailPreview ? (
+                        <div className="relative aspect-video w-48 rounded-lg overflow-hidden">
+                          <img
+                            src={thumbnailPreview || "/placeholder.svg"}
+                            alt="Thumbnail preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          onClick={() => thumbnailInputRef.current?.click()}
+                          className="h-auto py-2"
+                        >
+                          <ImageIcon className="h-4 w-4 mr-2" />
+                          Add Thumbnail
+                        </Button>
+                      )}
+                      <input
+                        type="file"
+                        ref={thumbnailInputRef}
+                        onChange={handleThumbnailChange}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Upload a custom thumbnail or we'll generate one from your video
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="details" className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Add a title that describes your video"
+                    maxLength={100}
+                  />
+                  <div className="text-xs text-muted-foreground text-right">{title.length}/100</div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Tell viewers about your video"
+                    className="min-h-32"
+                    maxLength={5000}
+                  />
+                  <div className="text-xs text-muted-foreground text-right">{description.length}/5000</div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="education">Education</SelectItem>
+                      <SelectItem value="entertainment">Entertainment</SelectItem>
+                      <SelectItem value="gaming">Gaming</SelectItem>
+                      <SelectItem value="music">Music</SelectItem>
+                      <SelectItem value="tech">Technology</SelectItem>
+                      <SelectItem value="sports">Sports</SelectItem>
+                      <SelectItem value="travel">Travel</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="visibility">Visibility</Label>
+                  <Select value={visibility} onValueChange={setVisibility}>
+                    <SelectTrigger id="visibility">
+                      <SelectValue placeholder="Select visibility" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">
+                        <div className="flex items-center">
+                          <Globe className="h-4 w-4 mr-2" />
+                          Public
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="unlisted">
+                        <div className="flex items-center">
+                          <Link className="h-4 w-4 mr-2" />
+                          Unlisted
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="private">
+                        <div className="flex items-center">
+                          <Lock className="h-4 w-4 mr-2" />
+                          Private
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="tags">Tags</Label>
+                  <div className="flex space-x-2">
+                    <Input
+                      id="tags"
+                      value={currentTag}
+                      onChange={(e) => setCurrentTag(e.target.value)}
+                      placeholder="Add a tag"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault()
+                          handleAddTag()
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={handleAddTag}
+                      disabled={!currentTag || tags.length >= 5}
+                    >
+                      <Tag className="h-4 w-4 mr-2" />
+                      Add
+                    </Button>
+                  </div>
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {tags.map((tag) => (
+                        <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                          {tag}
+                          <X className="h-3 w-3 cursor-pointer" onClick={() => handleRemoveTag(tag)} />
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">Add up to 5 tags to help viewers find your video</p>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+
+          {isUploading && (
+            <div className="px-6 py-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Uploading...</span>
+                <span className="text-sm text-muted-foreground">{uploadProgress}%</span>
+              </div>
+              <Progress value={uploadProgress} className="h-2" />
+            </div>
+          )}
+
+          <Separator />
+
+          <CardFooter className="flex justify-between py-4">
+            <Button variant="ghost" onClick={() => router.back()}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpload} disabled={isUploading || !videoFile}>
+              {isUploading ? "Uploading..." : "Upload Video"}
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </main>
+  )
+}
