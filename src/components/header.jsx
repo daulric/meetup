@@ -10,7 +10,7 @@ export function Header() {
           s2
         </Link>
       </div>
-      <div className="flex items-center gap-1 sm:gap-2">
+      <div className="flex items-center gap-1 sm:gap-4">
         <ModeToggle />
         <ProfileIcon />
       </div>
