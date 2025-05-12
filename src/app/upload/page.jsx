@@ -151,7 +151,7 @@ export default function UploadPage() {
   }
 
   return (
-    <main className="min-h-screen pt-20 p-4 bg-background">
+    <main className="min-h-screen pt-5 p-4 bg-background">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Upload Video</h1>

@@ -91,7 +91,7 @@ export default function HomePage() {
 
   return (
     <>
-      <main className="min-h-screen pt-20 p-4 bg-background">
+      <main className="min-h-screen pt-15 p-4 bg-background">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
