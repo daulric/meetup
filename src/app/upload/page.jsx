@@ -13,9 +13,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/context/AuthProvider"
 import { compressAndUpload, uploadThumbnail } from "./MediaManager"
+import { categories, visibilites } from "@/lib/videos/details"
 
 export default function UploadPage() {
   const router = useRouter()
@@ -300,14 +300,7 @@ export default function UploadPage() {
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="education">Education</SelectItem>
-                      <SelectItem value="entertainment">Entertainment</SelectItem>
-                      <SelectItem value="gaming">Gaming</SelectItem>
-                      <SelectItem value="music">Music</SelectItem>
-                      <SelectItem value="tech">Technology</SelectItem>
-                      <SelectItem value="sports">Sports</SelectItem>
-                      <SelectItem value="travel">Travel</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      { categories.map((detail) => <SelectItem value={detail.toLowerCase()}>{detail}</SelectItem>) }
                     </SelectContent>
                   </Select>
                 </div>
@@ -319,64 +312,16 @@ export default function UploadPage() {
                       <SelectValue placeholder="Select visibility" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="public">
-                        <div className="flex items-center">
-                          <Globe className="h-4 w-4 mr-2" />
-                          Public
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="unlisted">
-                        <div className="flex items-center">
-                          <Link className="h-4 w-4 mr-2" />
-                          Unlisted
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="private">
-                        <div className="flex items-center">
-                          <Lock className="h-4 w-4 mr-2" />
-                          Private
-                        </div>
-                      </SelectItem>
+                      {visibilites.map(({ type, icon: Icon }) => (
+                        <SelectItem value={type.toLowerCase()}>
+                          <div className="flex items-center">
+                            <Icon className="h-4 w-4 mr-2" />
+                            { type }
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tags">Tags</Label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="tags"
-                      value={currentTag}
-                      onChange={(e) => setCurrentTag(e.target.value)}
-                      placeholder="Add a tag"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault()
-                          handleAddTag()
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={handleAddTag}
-                      disabled={!currentTag || tags.length >= 5}
-                    >
-                      <Tag className="h-4 w-4 mr-2" />
-                      Add
-                    </Button>
-                  </div>
-                  {tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                          {tag}
-                          <X className="h-3 w-3 cursor-pointer" onClick={() => handleRemoveTag(tag)} />
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-xs text-muted-foreground">Add up to 5 tags to help viewers find your video</p>
                 </div>
               </TabsContent>
             </Tabs>

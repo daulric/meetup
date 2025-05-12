@@ -430,7 +430,7 @@ export default function VideoPage({ videoData }) {
                 ref={videoRef}
                 src={videoData.video}
                 className="w-full h-full object-contain"
-                poster={videoData.thumbnail_url}
+                poster={videoData.thumbnail}
                 onLoadedMetadata={handleMetadataLoaded}
                 onTimeUpdate={handleTimeUpdate}
                 onClick={togglePlay}
@@ -547,7 +547,7 @@ export default function VideoPage({ videoData }) {
             <h1 className="text-2xl font-bold">{videoData.title}</h1>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-2 text-sm text-muted-foreground">
               <div>
-                {videoData.views || 0} views •{" "}
+                {videoData.views} views •{" "}
                 {videoData.uploadDate}
               </div>
               <div className="flex items-center space-x-2 mt-2 sm:mt-0">
@@ -594,7 +594,7 @@ export default function VideoPage({ videoData }) {
             <div className="flex items-start space-x-4">
               <Avatar className="h-12 w-12">
                 <AvatarImage
-                  src={videoData.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${videoData.username}`}
+                  src={videoData.avatar_url ? videoData.avatar_url : `https://api.dicebear.com/7.x/avataaars/svg?seed=${videoData.username}`}
                   alt={videoData.username}
                 />
                 <AvatarFallback>{videoData.username?.[0]}</AvatarFallback>
@@ -646,7 +646,7 @@ export default function VideoPage({ videoData }) {
                 {(videoData.comments || []).map((comment, index) => (
                   <div key={comment.id || index} className="flex space-x-4">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={comment.avatar || "/placeholder.svg"} alt={comment.user} />
+                      <AvatarImage src={comment?.avatar } alt={comment.user} />
                       <AvatarFallback>{comment.user?.[0] || "U"}</AvatarFallback>
                     </Avatar>
                     <div>
