@@ -7,13 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Play, Search } from 'lucide-react'
 import { useAuth } from "@/context/AuthProvider"
-import { useRouter } from "next/navigation"
-
 
 export default function HomePage({videos}) {
   const [searchQuery, setSearchQuery] = useState("");
-  const { user: {profile} } = useAuth();
-  const router = useRouter();
+  const { user: {user, profile} } = useAuth();
 
   return (
     <>
@@ -21,7 +18,7 @@ export default function HomePage({videos}) {
         <div className="max-w-6xl mx-auto">
           <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold">Welcome {profile?.username}</h1>
+              <h1 className="text-3xl font-bold">Welcome {profile?.username || "Guest"}</h1>
               <p className="text-muted-foreground">Your Place of Rest</p>
             </div>
             <div className="flex w-full md:w-auto">

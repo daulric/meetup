@@ -2,8 +2,14 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/AuthProvider"
+import { redirect } from "next/navigation"
 
 export default function Home() {
+  const {user: { user }} = useAuth();
+
+  if (user) { redirect("/home") };
+
   return (
     <>
       <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
@@ -18,6 +24,9 @@ export default function Home() {
             </Button>
             <Button asChild variant="outline" className="w-full" size="lg">
               <Link href="/auth/signup">Sign Up</Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full" size="lg">
+              <Link href="/home">Browse as Guest</Link>
             </Button>
           </div>
         </div>

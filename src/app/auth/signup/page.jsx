@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/mode-toggle"
 import { useAuth } from "@/context/AuthProvider"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export default function SignupPage() {
   const email = useRef(null);
@@ -18,6 +19,7 @@ export default function SignupPage() {
   const  password = useRef(null);
   const [isLoading, setIsLoading] = useState(false)
   const {signUp, supabase} = useAuth();
+  const router = useRouter();
 
   const handleEmailSignup = async (e) => {
     e.preventDefault();
@@ -43,7 +45,7 @@ export default function SignupPage() {
         if (profileError) {
           throw profileError;
         } else if (profileData) {
-          globalThis.location.href = "/"
+          router.back();
         }
       }
     } catch (error) {

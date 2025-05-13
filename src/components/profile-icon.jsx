@@ -20,7 +20,6 @@ export function ProfileIcon() {
 
   const handleLogout = () => {
     signOut();
-    globalThis.location.reload();
     sessionStorage.removeItem("profile_user");
   }
 
@@ -98,7 +97,7 @@ export function ProfileIcon() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => handleLogout()} className="cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

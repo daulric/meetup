@@ -19,7 +19,7 @@ import { categories, visibilites } from "@/lib/videos/details"
 
 export default function UploadPage() {
   const router = useRouter()
-  const { user, supabase } = useAuth()
+  const { supabase } = useAuth()
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [videoFile, setVideoFile] = useState(null)

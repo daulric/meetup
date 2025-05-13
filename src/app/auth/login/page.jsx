@@ -12,12 +12,13 @@ import { ModeToggle } from "@/components/mode-toggle"
 
 import { useAuth } from "@/context/AuthProvider"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
   const email = useRef(null);
   const password = useRef(null);
   const [isLoading, setIsLoading] = useState(false)
-  //const [error, setError] = useState(null);
+  const router = useRouter();
 
   const { signIn } = useAuth();
 
@@ -29,7 +30,7 @@ export default function LoginPage() {
       const data = await signIn({email: email.current.value, password: password.current.value});
 
       if (data) {
-        globalThis.location.href = "/";
+        router.back();
       }
     } catch (error) {
       toast.error("Login Failed", {
