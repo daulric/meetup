@@ -237,7 +237,7 @@ export default function UploadPage() {
                       {thumbnailPreview ? (
                         <div className="relative aspect-video w-48 rounded-lg overflow-hidden">
                           <img
-                            src={thumbnailPreview || "/placeholder.svg"}
+                            src={thumbnailPreview}
                             alt="Thumbnail preview"
                             className="w-full h-full object-cover"
                           />

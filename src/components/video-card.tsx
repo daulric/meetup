@@ -24,7 +24,7 @@ export function VideoCard({ video, compact = false }: VideoCardProps) {
           <div className="flex">
             <div className="relative w-40 h-24 flex-shrink-0">
               <img
-                src={video.thumbnail || "/placeholder.svg"}
+                src={video.thumbnail}
                 alt={video.title}
                 className="w-full h-full object-cover"
               />
@@ -50,7 +50,7 @@ export function VideoCard({ video, compact = false }: VideoCardProps) {
   return (
     <Card className="overflow-hidden">
       <div className="relative">
-        <img src={video.thumbnail || "/placeholder.svg"} alt={video.title} className="w-full h-40 object-cover" />
+        <img src={video.thumbnail} alt={video.title} className="w-full h-40 object-cover" />
         <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1 py-0.5 rounded">
           {video.duration}
         </div>
