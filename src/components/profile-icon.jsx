@@ -63,6 +63,9 @@ export function ProfileIcon() {
 
   const avatar_url = profile?.avatar_url || user.user_metadata.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.username || "G"}`
 
+  console.log(user);
+
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -70,7 +73,7 @@ export function ProfileIcon() {
           <Avatar className="h-8 w-8">
             <AvatarImage
               src={avatar_url}
-              alt={profile?.username || user.user_metadata.username || "G"}
+              alt={user.user_metadata.display_name ||profile?.username ||  user.user_metadata.username || "G"}
             />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
@@ -79,7 +82,7 @@ export function ProfileIcon() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{profile?.username || user.user_metadata.username || "G"}</p>
+            <p className="text-sm font-medium leading-none">{user.user_metadata.display_name ||profile?.username ||  user.user_metadata.username || "G"}</p>
             <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
           </div>
         </DropdownMenuLabel>

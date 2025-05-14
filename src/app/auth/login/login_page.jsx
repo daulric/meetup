@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter();
 
-  const { signIn, oauth, user: {user} } = useAuth();
+  const { signIn, user: {user} } = useAuth();
 
   if (user) {
     redirect("/home");
@@ -37,26 +37,6 @@ export default function LoginPage() {
         router.back();
       }
     } catch (error) {
-      toast.error("Login Failed", {
-        description: error?.message,
-      });
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleGithubLogin = async () => {
-    setIsLoading(true)
-
-    try {
-      const data = await oauth("github");
-
-      if (data) {
-        router.back();
-      }
-
-    } catch (error) {
-      //Error Handling for Github Method
       toast.error("Login Failed", {
         description: error?.message,
       });
@@ -113,11 +93,6 @@ export default function LoginPage() {
             <span className="px-3 text-sm text-muted-foreground">OR</span>
             <Separator className="flex-1" />
           </div>
-
-          <Button variant="outline" className="w-full" onClick={handleGithubLogin} disabled={isLoading}>
-            <Github className="mr-2 h-4 w-4" />
-            Login with GitHub
-          </Button>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">

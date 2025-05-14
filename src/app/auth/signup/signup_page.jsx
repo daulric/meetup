@@ -18,7 +18,7 @@ export default function SignupPage() {
   const username = useRef(null);
   const  password = useRef(null);
   const [isLoading, setIsLoading] = useState(false)
-  const {signUp, github_oauth,  supabase, user: { user }} = useAuth();
+  const {signUp, supabase, user: { user }} = useAuth();
   const router = useRouter();
 
   if (user) {
@@ -28,28 +28,44 @@ export default function SignupPage() {
   const handleEmailSignup = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+
+    if (!email.current || !username.current || !password.current) {
+      toast.error("Invalid input", {
+        description: "Please fill in all fields"
+      });
+      return;
+    }
+
+    const emailValue = email.current.value;
+    const passwordValue = password.current.value;
+    const usernameValue = username.current.value;
   
     try {
       // Sign up user
-      const data = await signUp({email: email.current.value, password: password.current.value});
+      const data = await signUp({email: emailValue, password: passwordValue});
   
       const user = data.user;
   
       if (user) {
-        // Insert user profile into meetup-app.profiles table
         const { data: profileData, error: profileError } = await supabase
           .schema("meetup-app")
           .from("profiles")
           .insert({
             id: user.id,
-            username: username.current.value,
+            username: usernameValue,
           })
           .select();
-  
+
+        const { error: display_name_error } = await supabase.auth.updateUser({
+          data: { 
+            display_name: usernameValue,
+          }
+        });
+
         if (profileError) {
           throw profileError;
-        } else if (profileData) {
-          router.back();
+        } else if (profileData && !display_name_error) {
+          setTimeout(() => router.back(), 800);
         }
       }
     } catch (error) {
@@ -61,49 +77,6 @@ export default function SignupPage() {
     }
   };
   
-
-  const handleGithubSignup = async () => {
-    setIsLoading(true)
-
-    try {
-
-      const user_data = await oauth("github");
-
-      if (user_data) {
-        const { data: { session } } = await supabase.auth.getSession();
-        const user = session.user;
-
-        const { data: profileData, error: profileError } = await supabase
-          .schema("meetup-app")
-          .from("profiles")
-          .insert({
-            id: user.id,
-            username: user.user_metadata.user_name || user.user_metadata.preferred_username,
-            avatar_url: user.user_metadata.avatar_url
-          })
-          .select();
-        
-        if (profileError) {
-          throw profileError;
-        }
-
-        if (profileData) {
-          router.back();
-        }
-
-      }
-
-
-
-    } catch (error) {
-      toast.error("Github Sign Up Failed", {
-        description: error?.message
-      });
-      console.log(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-background">
@@ -156,11 +129,6 @@ export default function SignupPage() {
             <span className="px-3 text-sm text-muted-foreground">OR</span>
             <Separator className="flex-1" />
           </div>
-
-          <Button variant="outline" className="w-full" onClick={handleGithubSignup} disabled={isLoading}>
-            <Github className="mr-2 h-4 w-4" />
-            Sign up with GitHub
-          </Button>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
