@@ -137,21 +137,39 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const github_oauth = async (redirectTo = "/") => {
+  const oauth = async (provider, redirectTo = "") => {
+    if (!provider) {
+      throw new Error("No Providers Mentioned");
+    }
+    
     try {
       setLoading(true);
-      const { data, error } = await supabase.auth.signInWithOAuth({ provider: "github", options: {
-        redirectTo: redirectTo
-      }});
-
+  
+      const formattedRedirectTo = redirectTo.startsWith('/') 
+        ? redirectTo.substring(1) 
+        : redirectTo;
+      
+      const redirectUrl = formattedRedirectTo 
+        ? `${window.location.origin}/${formattedRedirectTo}`
+        : window.location.origin;
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: redirectUrl
+        }
+      });
+      
       if (error) {
         throw error;
       }
-
-     return data;
+      
+      return data;
     } catch(e) {
       setError(e.message);
       throw e;
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -222,7 +240,7 @@ export function AuthProvider({ children }) {
     signOut,
     resetPassword,
     supabase,
-    github_oauth
+    oauth
   };
 
   return (

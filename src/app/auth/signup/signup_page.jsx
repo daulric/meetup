@@ -67,7 +67,7 @@ export default function SignupPage() {
 
     try {
 
-      const user_data = await github_oauth();
+      const user_data = await oauth("github");
 
       if (user_data) {
         const { data: { session } } = await supabase.auth.getSession();
