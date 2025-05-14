@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter();
 
-  const { signIn, user: {user} } = useAuth();
+  const { signIn, github_oauth, user: {user} } = useAuth();
 
   if (user) {
     redirect("/home");
@@ -49,9 +49,18 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // Github Signin Login Method
+      const data = await github_oauth();
+
+      if (data) {
+        router.back();
+      }
+
     } catch (error) {
       //Error Handling for Github Method
+      toast.error("Login Failed", {
+        description: error?.message,
+      });
+    } finally {
       setIsLoading(false)
     }
   }

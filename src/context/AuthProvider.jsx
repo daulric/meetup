@@ -137,6 +137,24 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const github_oauth = async (redirectTo = "/") => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({ provider: "github", options: {
+        redirectTo: redirectTo
+      }});
+
+      if (error) {
+        throw error;
+      }
+
+     return data;
+    } catch(e) {
+      setError(e.message);
+      throw e;
+    }
+  }
+
   // Signup function
   const signUp = async ({ email, password }) => {
     try {
@@ -203,7 +221,8 @@ export function AuthProvider({ children }) {
     signUp,
     signOut,
     resetPassword,
-    supabase
+    supabase,
+    github_oauth
   };
 
   return (

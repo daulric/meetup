@@ -18,7 +18,7 @@ export default function SignupPage() {
   const username = useRef(null);
   const  password = useRef(null);
   const [isLoading, setIsLoading] = useState(false)
-  const {signUp, supabase, user: { user }} = useAuth();
+  const {signUp, github_oauth,  supabase, user: { user }} = useAuth();
   const router = useRouter();
 
   if (user) {
@@ -66,17 +66,41 @@ export default function SignupPage() {
     setIsLoading(true)
 
     try {
-      // TODO: Implement Supabase GitHub signup
-      // Example:
-      // const { error } = await supabase.auth.signInWithOAuth({
-      //   provider: 'github',
-      //   options: {
-      //     redirectTo: `${window.location.origin}/dashboard`,
-      //   },
-      // })
+
+      const user_data = await github_oauth();
+
+      if (user_data) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session.user;
+
+        const { data: profileData, error: profileError } = await supabase
+          .schema("meetup-app")
+          .from("profiles")
+          .insert({
+            id: user.id,
+            username: user.user_metadata.user_name || user.user_metadata.preferred_username,
+            avatar_url: user.user_metadata.avatar_url
+          })
+          .select();
+        
+        if (profileError) {
+          throw profileError;
+        }
+
+        if (profileData) {
+          router.back();
+        }
+
+      }
+
+
 
     } catch (error) {
-      //Error Handling for Github
+      toast.error("Github Sign Up Failed", {
+        description: error?.message
+      });
+      console.log(error)
+    } finally {
       setIsLoading(false)
     }
   }
