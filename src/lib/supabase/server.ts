@@ -17,10 +17,12 @@ export async function createClient(req: NextRequest) {
           return cookieStore.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            req ? req.cookies.set(name, value) :
-            cookieStore.set(name, value, options)
-          )
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              req ? req.cookies.set(name, value) :
+              cookieStore.set(name, value, options)
+            );
+          } catch {}
         },
       },
     }
