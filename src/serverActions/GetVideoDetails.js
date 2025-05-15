@@ -35,7 +35,9 @@ export async function GetVideoDetails(id) {
         uploadDate: (new Date(data.created_at)).toDateString(),
         title: data.title,
         description: data.description,
-        views: data.views
+        views: data.views,
+        category: data.category,
+        created_at: data.created_at,
     }
 
     if (data.visibility === "private" && data.userid !== user.id) return null;
@@ -76,6 +78,8 @@ export async function GetPublicVideos() {
             title: video_data.title,
             description: video_data.description,
             views: video_data.views,
+            category: video_data.category,
+            created_at: data.created_at,
         }
     }));
 

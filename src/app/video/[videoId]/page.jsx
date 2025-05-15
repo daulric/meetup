@@ -1,5 +1,5 @@
 import VideoPage from "./VideoPage"
-import { GetVideoDetails } from "@/serverActions/GetVideoDetails"
+import { GetVideoDetails, GetPublicVideos } from "@/serverActions/GetVideoDetails"
 import { notFound as NotFound } from "next/navigation";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
@@ -31,11 +31,13 @@ export default async function PAGE({params}) {
 
     if (!data) return (<NotFound />);
 
+    const PublicVideos = await GetPublicVideos();
+
     const {  error } = await supabase.schema("meetup-app")
         .from("videos")
         .update({views: (Number(data.views) + 1)})
         .eq("video_id", id)
 
     if (error) {console.log(error) ;return ( <div>Vue Problem</div> )}
-    return (<VideoPage videoData={data}/>)
+    return (<VideoPage videoData={data} public_videos={PublicVideos}/>)
 }

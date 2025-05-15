@@ -92,7 +92,7 @@ const keyboardShortcuts = [
   { key: "L", action: "Forward 10 seconds" },
 ]
 
-export default function VideoPage({ videoData }) {
+export default function VideoPage({ videoData, public_videos }) {
   const { user } = useAuth()
 
   const [isPlaying, setIsPlaying] = useState(false)
@@ -415,6 +415,24 @@ export default function VideoPage({ videoData }) {
     }
   }
 
+  const trending_vids = [...public_videos]
+    .sort((a, b) => ( b.views - a.views) )
+    .filter((d) => d.id !== videoData.id)
+    .slice(0, 4);
+
+  const related_vids = [...public_videos]
+    .filter((d) => d.category === videoData.category)
+    .map(d => ({ value: d, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({value}) => value)
+    .filter((d) => d.id !== videoData.id)
+    .slice(0, 4);
+  
+  const new_vids = [...public_videos]
+    .sort((a, b) => ( (new Date(a.created_at)) - (new Date(b.created_at)) ) )
+    .filter(d => d.id !== videoData.id)
+    .slice(0, 12);
+  
   return (
     <main className="min-h-screen pt-5 p-4 bg-background">
       <div className="max-w-6xl mx-auto">
@@ -687,10 +705,6 @@ export default function VideoPage({ videoData }) {
                 <Flame className="h-4 w-4 mr-2" />
                 Trending
               </TabsTrigger>
-              <TabsTrigger value="recommended">
-                <Heart className="h-4 w-4 mr-2" />
-                Recommended
-              </TabsTrigger>
               <TabsTrigger value="new">
                 <Clock className="h-4 w-4 mr-2" />
                 New
@@ -699,7 +713,7 @@ export default function VideoPage({ videoData }) {
 
             <TabsContent value="related" className="mt-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {relatedVideos.map((video) => (
+                {related_vids.map((video) => (
                   <VideoCard key={video.id} video={video} />
                 ))}
               </div>
@@ -707,15 +721,7 @@ export default function VideoPage({ videoData }) {
 
             <TabsContent value="trending" className="mt-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {trendingVideos.map((video) => (
-                  <VideoCard key={video.id} video={video} />
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="recommended" className="mt-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {recommendedVideos.map((video) => (
+                {trending_vids.map((video) => (
                   <VideoCard key={video.id} video={video} />
                 ))}
               </div>
@@ -723,8 +729,7 @@ export default function VideoPage({ videoData }) {
 
             <TabsContent value="new" className="mt-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Mix of videos for the "New" tab */}
-                {[...trendingVideos.slice(0, 2), ...recommendedVideos.slice(0, 2)].map((video) => (
+                {new_vids.map((video) => (
                   <VideoCard key={video.id} video={video} />
                 ))}
               </div>

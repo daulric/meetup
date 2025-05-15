@@ -9,25 +9,28 @@ export async function middleware(req) {
   const res = NextResponse.next();
   const supabase = await createClient(req);
 
-  const { data: { user } } = await supabase.auth.getUser();
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+  
+    const path = req.nextUrl.pathname;
+  
+    if (user && authRoutes.some(route => route === path.split("/")[1])) {
+      const url = new URL("/home", req.url);
+      return NextResponse.redirect(url);
+    }
+  
+    // Get first part of the path after the root '/'
+    const firstPathSegment = path.split("/")[1];
+  
+    if (!user && protectedRoutes.includes(firstPathSegment)) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/auth-required";
+      return NextResponse.rewrite(url);
+    }
+  
+    return res;
+  } catch {}
 
-  const path = req.nextUrl.pathname;
-
-  if (user && authRoutes.some(route => route === path.split("/")[1])) {
-    const url = new URL("/home", req.url);
-    return NextResponse.redirect(url);
-  }
-
-  // Get first part of the path after the root '/'
-  const firstPathSegment = path.split("/")[1];
-
-  if (!user && protectedRoutes.includes(firstPathSegment)) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/auth-required";
-    return NextResponse.rewrite(url);
-  }
-
-  return res;
 }
 
 export const config = {
