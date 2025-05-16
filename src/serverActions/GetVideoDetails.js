@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 
-export async function GetVideoDetails(id) {
+export async function GetVideoDetails(id, time_allowed = 10) {
     const supabase = await createClient();
     const { data: {user} } = await supabase.auth.getUser();
 
@@ -21,9 +21,9 @@ export async function GetVideoDetails(id) {
         .single();
     
     const [video_url, thumbnail_url, avatar_url] = await Promise.all([
-        supabase.storage.from("videos").createSignedUrl(data.video_path, 10).then(({data}) => data.signedUrl),
-        supabase.storage.from("images").createSignedUrl(data.thumbnail_path, 10).then(({data}) => data.signedUrl),
-        user_data.avatar_url && supabase.storage.from("images").createSignedUrl(user_data.avatar_url, 10).then(({data}) => data.signedUrl),
+        supabase.storage.from("videos").createSignedUrl(data.video_path, time_allowed).then(({data}) => data.signedUrl),
+        supabase.storage.from("images").createSignedUrl(data.thumbnail_path, time_allowed).then(({data}) => data.signedUrl),
+        user_data.avatar_url && supabase.storage.from("images").createSignedUrl(user_data.avatar_url, time_allowed).then(({data}) => data.signedUrl),
     ]);
 
     const return_data = {
@@ -44,7 +44,7 @@ export async function GetVideoDetails(id) {
     return return_data;
 }
 
-export async function GetPublicVideos() {
+export async function GetPublicVideos(time_allowed = 10) {
     const supabase = await createClient();
 
     const { data, error } = await supabase.schema("meetup-app")
@@ -63,9 +63,9 @@ export async function GetPublicVideos() {
             .single();
 
         const [video_url, thumbnail_url, avatar_url] = await Promise.all([
-            supabase.storage.from("videos").createSignedUrl(video_data.video_path, 10).then(({data}) => data.signedUrl),
-            supabase.storage.from("images").createSignedUrl(video_data.thumbnail_path, 10).then(({data}) => data.signedUrl),
-            user_data.avatar_url && supabase.storage.from("images").createSignedUrl(user_data.avatar_url, 10).then(({data}) => data.signedUrl),
+            supabase.storage.from("videos").createSignedUrl(video_data.video_path, time_allowed).then(({data}) => data.signedUrl),
+            supabase.storage.from("images").createSignedUrl(video_data.thumbnail_path, time_allowed).then(({data}) => data.signedUrl),
+            user_data.avatar_url && supabase.storage.from("images").createSignedUrl(user_data.avatar_url, time_allowed).then(({data}) => data.signedUrl),
         ]);
 
         return {

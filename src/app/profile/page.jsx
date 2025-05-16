@@ -1,3 +1,10 @@
+"use client"
+
+import { useComputed, useSignal } from "@preact/signals-react"
+
 export default function PROFILE() {
-    return <div>profile</div>
+    //useSignals()
+    const sig = useSignal(0)
+
+    return <div onClick={() => sig.value++} > profile { useComputed(() => sig.value * 10) }</div>
 }
