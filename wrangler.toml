@@ -1,0 +1,7 @@
+name = "s2"
+
+compatibility_date="2025-06-05"
+compatibility_flags=["nodejs_compact"]
+
+main = ".worker-next/index.mjs"
+assets = { directory = ".worker-next/assets", binding = "ASSETS" }
