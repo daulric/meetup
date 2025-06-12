@@ -1,15 +1,17 @@
 {
-  "name": "s2",
+  "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "compatibility_date": "2025-04-01",
+  "name": "s2",
+  "compatibility_date": "2024-12-30",
   "compatibility_flags": ["nodejs_compat"],
-  "minify": true,
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
   },
-  "observability": {
-    "enabled": true
-  },
-  "upload_source_maps": true
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "s2",
+    },
+  ]
 }

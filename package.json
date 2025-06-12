@@ -7,11 +7,22 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "preview": "next  build && next start"
+    "preview": "next  build && next start",
+
+    "build:cf": "NEXT_PRIVATE_STANDALONE=true next build",
+    "check": "npm run build:cf && tsc && wrangler deploy --dry-run",
+    "deploy:cf": "wrangler deploy",
+    "postbuild": "opennextjs-cloudflare build -s",
+
+    "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@daulric/cachy": "^0.0.11",
     "@hookform/resolvers": "^5.0.1",
+    "@opennextjs/cloudflare": "^1.2.1",
     "@preact/signals-react": "^3.0.1",
     "@radix-ui/react-accordion": "^1.2.10",
     "@radix-ui/react-alert-dialog": "^1.1.13",
