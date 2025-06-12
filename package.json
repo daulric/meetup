@@ -12,12 +12,11 @@
     "build:cf": "NEXT_PRIVATE_STANDALONE=true next build",
     "check": "npm run build:cf && tsc && wrangler deploy --dry-run",
     "deploy:cf": "wrangler deploy",
-    "postbuild": "opennextjs-cloudflare build -s",
+    "cf:postbuild": "opennextjs-cloudflare build -s",
 
     "cf:build": "opennextjs-cloudflare build",
     "cf:deploy": "opennextjs-cloudflare deploy",
     "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
