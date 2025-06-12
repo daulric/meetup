@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +10,7 @@ import { useAuth } from "@/context/AuthProvider"
 
 export default function HomePage({videos}) {
   const [searchQuery, setSearchQuery] = useState("");
-  const { user: {user, profile} } = useAuth();
+  const { user: {profile} } = useAuth();
 
   return (
     <>
@@ -42,6 +42,7 @@ export default function HomePage({videos}) {
           </div>
 
           <div className="mt-12">
+            {/*
             <Card>
               <CardHeader>
                 <CardTitle>Popular Categories</CardTitle>
@@ -75,7 +76,9 @@ export default function HomePage({videos}) {
                   </Button>
                 </div>
               </CardContent>
+
             </Card>
+            */}
           </div>
         </div>
       </main>

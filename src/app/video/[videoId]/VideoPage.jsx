@@ -36,46 +36,6 @@ import {
 import { VideoCard } from "@/components/video-card"
 import { useAuth } from "@/context/AuthProvider"
 
-// Mock video data and other arrays remain the same...
-const trendingVideos = [
-  {
-    id: "trending1",
-    title: "10 JavaScript Tips You Didn't Know",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "1.5M",
-    duration: "14:25",
-    creator: "JSMaster",
-    createdAt: "1 week ago",
-  },
-  // Other trending videos...
-]
-
-const recommendedVideos = [
-  {
-    id: "rec1",
-    title: "TypeScript for Beginners",
-    thumbnail: "/placeholder.svg?height=180&width=320",
-    views: "325K",
-    duration: "18:52",
-    creator: "TypeMaster",
-    createdAt: "1 month ago",
-  },
-  // Other recommended videos...
-]
-
-const relatedVideos = [
-  {
-    id: "related1",
-    title: "Next.js vs Gatsby vs Create React App",
-    thumbnail: "/placeholder.svg?height=120&width=200",
-    views: "450K",
-    duration: "15:22",
-    creator: "TechGuru",
-    createdAt: "1 month ago",
-  },
-  // Other related videos...
-]
-
 // Keyboard shortcuts help data
 const keyboardShortcuts = [
   { key: "Space", action: "Play/Pause" },

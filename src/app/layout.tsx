@@ -12,6 +12,11 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "s2",
   description: "A fuze successor",
+  
+  icons: {
+    icon: [ { url: "/logo.jpeg" } ]
+    
+  }
 }
 
 export const viewport = {
