@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { VideoCard } from "@/components/video-card"
 import { Filter, Search } from "lucide-react"
+import GetSearchDetails from "@/lib/videos/GetSearchDetails";
 
 // Mock search results data
 const mockSearchResults = [
@@ -53,7 +54,6 @@ const mockSearchResults = [
   }
 ];
 
-
 export default function SearchPage() {
   const searchParams = useSearchParams()
   const query = searchParams.get("q") || ""
@@ -66,17 +66,18 @@ export default function SearchPage() {
 
   // Simulate search results based on query
   useEffect(() => {
-    if (query) {
-      // In a real app, this would be an API call
-      const filteredResults = mockSearchResults.filter(
-        (video) =>
-          video.title.toLowerCase().includes(query.toLowerCase()) ||
-          video.username.toLowerCase().includes(query.toLowerCase()),
-      )
-      setResults(filteredResults)
-    } else {
-      setResults(mockSearchResults)
+    async function getVideoData() {
+      if (query) {
+        // In a real app, this would be an API call
+        const filteredResults = await GetSearchDetails(query);
+        console.log(filteredResults)
+        setResults(filteredResults);
+      } else {
+        setResults(mockSearchResults)
+      }
     }
+
+    getVideoData();
   }, [query])
 
   const handleSortChange = (value: string) => {
