@@ -4,6 +4,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ModeToggle } from "@/components/mode-toggle"
 import { Shield, UserPlus, LogIn, Video, ThumbsUp, MessageSquare } from "lucide-react"
 
+export const metadata = {
+  title: "s2 - Authorization Required",
+  description: "Authorization is required for the feature",
+}
+
 export default function AuthRequiredPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">

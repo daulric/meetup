@@ -21,7 +21,7 @@ export function ProfileIcon() {
   const handleLogout = () => {
     signOut();
     sessionStorage.removeItem("profile_user");
-  }
+  }  
 
   // Get initials for avatar fallback
   const initials = (profile && profile?.username) ? profile?.username

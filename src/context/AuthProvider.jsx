@@ -2,6 +2,7 @@
 
 import { createContext, useState, useEffect, useContext } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
 const AuthContext = createContext();
 
@@ -18,6 +19,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     // Get the current session on component mount
@@ -45,7 +47,6 @@ export function AuthProvider({ children }) {
             prev.profile = profile_data;
             return prev;
           });
-
         } else {
           setUser(prev => {
             prev.profile = null;
@@ -89,7 +90,7 @@ export function AuthProvider({ children }) {
         
           fetchProfile();
         }
-
+        
         setUser(prev => ({
           ...prev,
           user: session.user,
@@ -134,6 +135,9 @@ export function AuthProvider({ children }) {
       throw error;
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        router.refresh();
+      }, 100);
     }
   };
 
@@ -192,6 +196,9 @@ export function AuthProvider({ children }) {
       throw error;
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        router.refresh();
+      }, 100);
     }
   };
 
@@ -204,6 +211,8 @@ export function AuthProvider({ children }) {
       if (error) {
         throw error;
       }
+
+      router.refresh();
     } catch (error) {
       setError(error.message);
     } finally {

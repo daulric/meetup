@@ -1,11 +1,11 @@
 // middleware.ts
 import { createClient } from "@/lib/supabase/server"
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const protectedRoutes = ['profile', 'settings', "upload"]; // Require Auth
 const authRoutes = ['auth', '']; //Doesnt Require Auth
 
-export async function middleware(req) {
+export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const supabase = await createClient(req);
 
